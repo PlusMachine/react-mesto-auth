@@ -1,0 +1,9 @@
+.elements__basket {
+  display: block;
+  transition: opacity 0.3s;
+}
+
+.elements__basket:hover {
+  opacity: 50%;
+  cursor: pointer;
+}

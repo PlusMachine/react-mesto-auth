@@ -1,0 +1,15 @@
+.profile__user {
+  display: grid;
+  align-items: center;
+  grid-template-columns: 120px 1fr;
+  column-gap: 30px;
+  row-gap: 26px;
+}
+
+@media screen and (max-width: 660px) {
+  .profile__user {
+    grid-template-columns: 1fr;
+    justify-content: center;
+    justify-items: center;
+  }
+}

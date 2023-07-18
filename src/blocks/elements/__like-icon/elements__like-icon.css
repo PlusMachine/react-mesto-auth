@@ -1,0 +1,14 @@
+.elements__like-icon {
+  display: block;
+  margin: 0;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.elements__like-icon:hover {
+  opacity: 50%;
+}
+
+.elements__like-icon:active {
+  content: url(../../../images/like_dark.svg);
+}
