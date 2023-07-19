@@ -1,7 +1,10 @@
 import Header from './Header/Header';
+import Login from './Login/Login';
+import Register from './Register/Register'
 import Main from './Main/Main';
 import Footer from './Footer/Footer';
 import ImagePopup from './ImagePopup/ImagePopup';
+import InfoTooltip from './InfoTooltip/InfoTooltip';
 import { useEffect, useState } from 'react';
 import api from '../utils/api';
 import CurrentUserContext from './contexts/CurrentUserContext';
@@ -9,6 +12,9 @@ import PopupWithConfirmation from './ConfirmationPopup/ConfirmationPopup';
 import EditProfilePopup from './EditProfilePopup/EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup/EditAvatarPopup'
 import AddPlacePopup from './AddPlacePopup/AddPlacePopup';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute/ProtectedRoute'
+
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -16,8 +22,14 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isConfirmPopupOpen, setIsConfirmPopupOpen] = useState(false);
+
   const [selectedCard, setSelectedCard] = useState({})
   const [isLoading, setIsLoading] = useState(true);
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const [currentUser, setCurrentUser] = useState({});
 
@@ -59,6 +71,35 @@ function App() {
   function handleCardDelete(card) {
     setIsConfirmPopupOpen(true);
     setSelectedCard(card);
+  }
+
+  function handleLogin({ email, password }) {
+    auth
+      .login(password, email)
+      .then((data) => {
+        if (data.token) {
+          setEmail(email);
+          setLoggedIn(true);
+          localStorage.setItem("token", data.token);
+          navigate("/");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  function handleRegister({ email, password }) {
+    auth
+      .register(password, email)
+      .then((data) => {
+        if (data) {
+          navigate("/sign-in");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   useEffect(
@@ -106,6 +147,29 @@ function App() {
       <div className="page-content">
         <Header />
 
+        <Routes>
+          <Route path="/sign-in" element={<Login />} />
+          <Route path="/sign-up" element={<Register />} />
+          <Route path="/" element={<ProtectedRoute
+            element={Main}
+            onEditProfile={handleEditProfileClick}
+            onEditAvatar={handleEditAvatarClick}
+            onAddPlace={handleAddPlaceClick}
+            onCardClick={handleCardClick}
+            cards={cards}
+            isLoading={isLoading}
+            onCardLike={handleCardLike}
+            onBasketClick={handleCardDelete}
+          />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+
+        </Routes>
+
+        {/* <Register />
+        <Login />
+
+        <InfoTooltip />
+
         <Main
           onEditProfile={handleEditProfileClick}
           onEditAvatar={handleEditAvatarClick}
@@ -115,7 +179,7 @@ function App() {
           isLoading={isLoading}
           onCardLike={handleCardLike}
           onBasketClick={handleCardDelete}
-        />
+        /> */}
 
         <Footer />
 

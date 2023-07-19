@@ -1,0 +1,20 @@
+.auth__form-field {
+  display: block;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid #cccccc;
+  width: 100%;
+  color: #fff;
+  margin: 0 auto;
+  font-family: 'Inter', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 17px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-top: 21px;
+}
+
+.auth__form-field:focus {
+  outline: 0;
+}
