@@ -1,12 +1,13 @@
 import { useState } from "react";
 
 
-export default function Login() {
+export default function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
-  function handleSubmitClick() {
-
+  function handleSubmitClick(e) {
+    e.preventDefault();
+    onLogin({ password, email });
   }
 
   function handleChangeEmail(e) {
@@ -35,6 +36,8 @@ export default function Login() {
             className="auth__form-field auth__form-field_input_email"
             required={true}
             placeholder="Email"
+            minLength="2"
+            maxLength="40"
           />
           <input
             value={password}
@@ -44,6 +47,8 @@ export default function Login() {
             className="auth__form-field auth__form-field_input_password"
             placeholder="Пароль"
             required={true}
+            minLength="6"
+            maxLength="16"
           />
         </fieldset>
         <button className="auth__button" type="submit">

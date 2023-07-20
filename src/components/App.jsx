@@ -5,15 +5,16 @@ import Main from './Main/Main';
 import Footer from './Footer/Footer';
 import ImagePopup from './ImagePopup/ImagePopup';
 import InfoTooltip from './InfoTooltip/InfoTooltip';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api from '../utils/api';
 import CurrentUserContext from './contexts/CurrentUserContext';
 import PopupWithConfirmation from './ConfirmationPopup/ConfirmationPopup';
 import EditProfilePopup from './EditProfilePopup/EditProfilePopup';
 import EditAvatarPopup from './EditAvatarPopup/EditAvatarPopup'
 import AddPlacePopup from './AddPlacePopup/AddPlacePopup';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute/ProtectedRoute'
+import { Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
+import * as auth from '../utils/auth';
 
 
 function App() {
@@ -22,16 +23,18 @@ function App() {
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
   const [isImagePopupOpen, setIsImagePopupOpen] = useState(false);
   const [isConfirmPopupOpen, setIsConfirmPopupOpen] = useState(false);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
 
   const [selectedCard, setSelectedCard] = useState({})
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const [loggedIn, setLoggedIn] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false);
 
   const [currentUser, setCurrentUser] = useState({});
+  const [isSucessfull, setIsSucessfull] = useState(false);
 
   const [cards, setCards] = useState([])
 
@@ -41,6 +44,7 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsImagePopupOpen(false);
     setIsConfirmPopupOpen(false);
+    setIsInfoTooltipOpen(false);
     setSelectedCard({});
   }
 
@@ -73,34 +77,57 @@ function App() {
     setSelectedCard(card);
   }
 
-  function handleLogin({ email, password }) {
+  function handleLogin({ password, email }) {
     auth
-      .login(password, email)
-      .then((data) => {
-        if (data.token) {
-          setEmail(email);
+      .authorize(password, email)
+      .then((res) => {
+        if (res.token) {
           setLoggedIn(true);
-          localStorage.setItem("token", data.token);
+          localStorage.setItem("token", res.token);
           navigate("/");
         }
       })
       .catch((error) => {
-        console.log(error);
+        setIsInfoTooltipOpen(true);
+        setIsSucessfull(false);
+        console.error(error);
       });
   }
 
-  function handleRegister({ email, password }) {
+  function handleRegister({ password, email }) {
     auth
       .register(password, email)
       .then((data) => {
         if (data) {
           navigate("/sign-in");
+          setIsInfoTooltipOpen(true);
+          setIsSucessfull(true);
         }
       })
       .catch((error) => {
-        console.log(error);
+        setIsInfoTooltipOpen(true);
+        setIsSucessfull(false);
+        console.error(error);
       });
   }
+
+  const tokenCheck = useCallback(() => {
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      auth.getContent(token).then((res) => {
+        if (res) {
+          setLoggedIn(true);
+          setEmail(res.data.email);
+          navigate("/", { replace: true })
+        }
+      });
+    }
+  }, [navigate])
+
+  useEffect(() => {
+    tokenCheck();
+  }, [tokenCheck])
 
   useEffect(
     () => {
@@ -113,6 +140,13 @@ function App() {
         }
         ).catch((error => console.error(`Ошибка при получении массива карточек или информации о пользователе ${error}`)))
     }, [])
+
+  function handleExit() {
+    localStorage.removeItem('token');
+    navigate('/sign-in');
+    setLoggedIn(false);
+    setEmail("");
+  }
 
   function handleCardLike(card) {
     const isLiked = card.likes.some(i => i._id === currentUser._id);
@@ -145,11 +179,15 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page-content">
-        <Header />
+        <Header
+          onExit={handleExit}
+          email={email}
+          loggedIn={loggedIn}
+        />
 
         <Routes>
-          <Route path="/sign-in" element={<Login />} />
-          <Route path="/sign-up" element={<Register />} />
+          <Route path="/sign-in" element={<Login onLogin={handleLogin} />} />
+          <Route path="/sign-up" element={<Register onRegister={handleRegister} />} />
           <Route path="/" element={<ProtectedRoute
             element={Main}
             onEditProfile={handleEditProfileClick}
@@ -160,28 +198,19 @@ function App() {
             isLoading={isLoading}
             onCardLike={handleCardLike}
             onBasketClick={handleCardDelete}
+            loggedIn={loggedIn}
           />} />
           <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
 
-        {/* <Register />
-        <Login />
+        {<InfoTooltip
+          isSucessfull={isSucessfull}
+          isOpen={isInfoTooltipOpen}
+          onClose={closeAllPopups}
+        />}
 
-        <InfoTooltip />
-
-        <Main
-          onEditProfile={handleEditProfileClick}
-          onEditAvatar={handleEditAvatarClick}
-          onAddPlace={handleAddPlaceClick}
-          onCardClick={handleCardClick}
-          cards={cards}
-          isLoading={isLoading}
-          onCardLike={handleCardLike}
-          onBasketClick={handleCardDelete}
-        /> */}
-
-        <Footer />
+        < Footer />
 
         <EditProfilePopup
           isOpen={isEditProfilePopupOpen}

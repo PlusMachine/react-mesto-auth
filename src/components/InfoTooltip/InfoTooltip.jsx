@@ -2,12 +2,10 @@ import closeIcon from '../../images/CloseIcon.svg';
 import agreeImage from '../../images/agree.svg';
 import errorImage from '../../images/error.svg';
 
-export default function InfoTooltip({ name, isOpen, onClose }) {
-
-  const isSucessfull = true;
+export default function InfoTooltip({ isOpen, onClose, isSucessfull }) {
 
   return (
-    <section className={`popup popup_type_${name} ${isOpen && 'popup_is-opened'}`}>
+    <section className={`popup popup_type_tooltip ${isOpen && 'popup_is-opened'}`}>
       <div className="popup__container" >
         <div className='popup__info-tooltip-wrapper'>
           <button className="popup__close-button" type="button" onClick={onClose}>

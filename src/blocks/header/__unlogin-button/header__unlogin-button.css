@@ -1,0 +1,12 @@
+.header__unlogin-button {
+  border: none;
+  display: block;
+  margin: 0 0 0 22px;
+  padding: 0;
+  text-decoration: none;
+  font-family: 'Inter', Arial, sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+  color: #9A9A9A;
+}

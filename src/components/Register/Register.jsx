@@ -6,8 +6,9 @@ export default function Register({ onRegister }) {
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
 
-  function handleSubmitClick() {
-    preve
+  function handleSubmitClick(e) {
+    e.preventDefault();
+    onRegister({ password, email })
   }
 
   function handleChangeEmail(e) {
