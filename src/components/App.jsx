@@ -121,7 +121,7 @@ function App() {
           setEmail(res.data.email);
           navigate("/", { replace: true })
         }
-      });
+      }).catch((error => console.error(`Ошибка при проверке токена ${error}`)))
     }
   }, [navigate])
 
